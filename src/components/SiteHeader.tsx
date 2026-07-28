@@ -230,7 +230,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center justify-end justify-self-end">
+        <div className="col-start-3 flex items-center justify-end justify-self-end">
           <UserMenu />
         </div>
       </div>
