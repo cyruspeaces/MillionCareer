@@ -1,0 +1,388 @@
+// 百万职场 · Prisma schema（MVP）
+// 详见 docs/技术架构.md
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  CREATOR
+  CLIENT
+  ADMIN
+}
+
+enum IdentityProvider {
+  PHONE
+  WECHAT
+}
+
+enum TaskStatus {
+  DRAFT
+  RECRUITING
+  IN_PROGRESS
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  SETTLED
+  CLOSED
+}
+
+enum ActivityStatus {
+  DRAFT
+  OPEN
+  JUDGING
+  PUBLISHED
+  CLOSED
+}
+
+enum SubmissionTargetType {
+  TASK
+  ACTIVITY
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum SettlementStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+/// 技能节点类型：工具技能 / 手艺技能 / 资格包（任务准入证）/ 成长里程碑
+enum SkillKind {
+  TOOL
+  CRAFT
+  QUALIFICATION
+  MILESTONE
+}
+
+/// 技能点亮来源
+enum SkillSource {
+  ASSESSMENT
+  COURSE
+  TASK
+  ACTIVITY
+  MILESTONE
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  phone     String?  @unique
+  nickname  String?
+  avatarUrl String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles         UserRole[]
+  identities    UserIdentity[]
+  profile       CreatorProfile?
+  tasksOwned    Task[]              @relation("TaskOwner")
+  taskApps      TaskApplication[]
+  activities    Activity[]          @relation("ActivityOwner")
+  activityRegs  ActivityRegistration[]
+  submissions   Submission[]
+  reviews       Review[]
+  notifications Notification[]
+  settlements   Settlement[]
+  userSkills    UserSkill[]
+  assessments   AssessmentRecord[]
+}
+
+model UserIdentity {
+  id             String           @id @default(cuid())
+  userId         String
+  provider       IdentityProvider
+  providerUserId String
+  createdAt      DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+  @@index([userId])
+}
+
+model CreatorProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  headline  String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id             String     @id @default(cuid())
+  ownerId        String
+  title          String
+  summary        String?
+  /// 详情正文（对应前端 about）
+  description    String
+  /// 品类约定值：对话训练 / 数据达标 / AI 漫剧 / 评测标注 / 内容创作 / 广告制作 …
+  category       String?
+  rewardText     String?
+  /// 结构化报酬金额（结算统计用）；展示优先用 rewardText
+  rewardAmount   Decimal?   @db.Decimal(12, 2)
+  /// 报酬单位：百条 / 包 / 单 / 小时 / 条 / 十组 …
+  rewardUnit     String?
+  /// 总名额；剩余名额 = quota - 有效报名数
+  quota          Int?
+  deadline       DateTime?
+  workType       String?
+  location       String?
+  suitFor        String?
+  /// 脱敏展示名（可与 owner 不同）
+  publisherName  String?
+  publisherNote  String?
+  deliverables   String[]   @default([])
+  /// 验收标准条目（取代旧 acceptanceCriteria）
+  acceptance     String[]   @default([])
+  specs          String[]   @default([])
+  requirements   String[]   @default([])
+  /// 报名步骤文案（仅 label；done 由用户报名状态派生）
+  enrollSteps    String[]   @default([])
+  /// [{ label, href }]
+  references     Json       @default("[]")
+  status         TaskStatus @default(DRAFT)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  owner         User              @relation("TaskOwner", fields: [ownerId], references: [id])
+  applications  TaskApplication[]
+  submissions   Submission[]      @relation("TaskSubmissions")
+  settlements   Settlement[]
+  taskSkills    TaskSkill[]
+
+  @@index([status])
+  @@index([ownerId])
+  @@index([category])
+}
+
+/// 技能树节点（目录表，运营维护；用户点亮记录见 UserSkill）
+model Skill {
+  id          String    @id @default(cuid())
+  /// 稳定英文码，代码与解锁规则引用它，不引用中文名
+  code        String    @unique
+  name        String
+  desc        String?
+  /// 业务赛道分组：起步与成长 / 通用底座 / 模型训练与数据 / 内容与广告创意 / Agent 与评测
+  group       String
+  kind        SkillKind
+  /// 成长阶梯：0 通用底座 → 1 赛道入门 → 2 专业技能 → 3 高价资格包
+  tier        Int       @default(0)
+  /// 是否可作为任务门槛（里程碑类为 false）
+  canGateTask Boolean   @default(true)
+  active      Boolean   @default(true)
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userSkills UserSkill[]
+  taskSkills TaskSkill[]
+
+  @@index([group])
+}
+
+/// 用户已点亮的技能（只增不减；重测/重复解锁靠唯一约束幂等）
+model UserSkill {
+  id         String      @id @default(cuid())
+  userId     String
+  skillId    String
+  source     SkillSource
+  /// 来源引用 id（测评记录 / 任务 / 课程 / 活动）
+  sourceRef  String?
+  unlockedAt DateTime    @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillId])
+  @@index([skillId])
+}
+
+/// AI 能力测评记录（每次完成一条；重测只增不减已点亮技能）
+model AssessmentRecord {
+  id                String   @id @default(cuid())
+  userId            String
+  /// 题库/计分模型版本（与前端 AssessmentResult.version 对齐）
+  version           Int      @default(2)
+  archetypeId       String
+  intentOptionId    String?
+  frequencyOptionId String?
+  /// [{ dimensionId, raw, normalized }]
+  scores            Json
+  /// { questionId: optionId }
+  answers           Json
+  /// 本次点亮的技能 code 列表
+  litSkillCodes     String[] @default([])
+  completedAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
+}
+
+/// 任务与技能的关联（required=true 为报名门槛，false 为加分项）
+model TaskSkill {
+  id       String  @id @default(cuid())
+  taskId   String
+  skillId  String
+  required Boolean @default(true)
+
+  task  Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, skillId])
+  @@index([skillId])
+}
+
+model TaskApplication {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([userId])
+}
+
+model Activity {
+  id          String         @id @default(cuid())
+  ownerId     String
+  title       String
+  summary     String?
+  description String
+  rules       String?
+  /// 权益长文案（可选）；列表优先用 benefitItems
+  benefits    String?
+  coverUrl    String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  status      ActivityStatus @default(DRAFT)
+  /// 品类：创作赛 / 评测周 / 共创营 / 作品展 …
+  category    String?
+  /// 权益条目
+  benefitItems String[]      @default([])
+  /// 时间线文案
+  timeline    String[]       @default([])
+  /// 参与步骤
+  howToJoin   String[]       @default([])
+  /// 参与/提交要求（详情展示；一期不收作品）
+  requirements String[]      @default([])
+  /// 评审方式说明
+  judgingNote String?
+  /// 总名额；剩余 = quota - 报名数
+  quota       Int?
+  /// 首页轮播色调：primary / accent / mix
+  tone        String?
+  /// 参与可点亮技能 code（文案引导；一期报名不自动写 UserSkill）
+  rewardSkillCodes String[]  @default([])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  owner          User                    @relation("ActivityOwner", fields: [ownerId], references: [id])
+  registrations  ActivityRegistration[]
+  submissions    Submission[]            @relation("ActivitySubmissions")
+
+  @@index([status])
+  @@index([ownerId])
+}
+
+model ActivityRegistration {
+  id         String   @id @default(cuid())
+  activityId String
+  userId     String
+  approved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([activityId, userId])
+  @@index([userId])
+}
+
+model Submission {
+  id         String               @id @default(cuid())
+  targetType SubmissionTargetType
+  taskId     String?
+  activityId String?
+  userId     String
+  content    String?
+  fileUrls   String[]
+  linkUrl    String?
+  status     SubmissionStatus     @default(PENDING)
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task     Task?    @relation("TaskSubmissions", fields: [taskId], references: [id], onDelete: Cascade)
+  activity Activity? @relation("ActivitySubmissions", fields: [activityId], references: [id], onDelete: Cascade)
+  review   Review?
+
+  @@index([userId])
+  @@index([taskId])
+  @@index([activityId])
+}
+
+model Review {
+  id           String           @id @default(cuid())
+  submissionId String           @unique
+  reviewerId   String
+  result       SubmissionStatus
+  comment      String?
+  createdAt    DateTime         @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer   User       @relation(fields: [reviewerId], references: [id])
+
+  @@index([reviewerId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String?
+  read      Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model Settlement {
+  id        String           @id @default(cuid())
+  taskId    String?
+  userId    String
+  amount    Decimal?         @db.Decimal(12, 2)
+  note      String?
+  status    SettlementStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  task Task? @relation(fields: [taskId], references: [id])
+  user User  @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([taskId])
+}
