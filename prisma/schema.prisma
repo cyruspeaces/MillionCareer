@@ -112,6 +112,18 @@ model UserIdentity {
   @@index([userId])
 }
 
+/** 短信登录验证码（短时有效，用后作废） */
+model SmsCode {
+  id        String    @id @default(cuid())
+  phone     String
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([phone, createdAt])
+}
+
 model CreatorProfile {
   id        String   @id @default(cuid())
   userId    String   @unique

@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     return fail("BAD_REQUEST", "请求体无效");
   }
 
-  const verified = verifySmsCode(body.phone ?? "", body.code ?? "");
+  const verified = await verifySmsCode(body.phone ?? "", body.code ?? "");
   if (!verified.ok) {
     return fail(verified.code, verified.message);
   }

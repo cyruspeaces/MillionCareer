@@ -9,14 +9,21 @@ export async function POST(request: Request) {
     return fail("BAD_REQUEST", "请求体无效");
   }
 
-  const result = sendSmsCode(body.phone ?? "");
+  const result = await sendSmsCode(body.phone ?? "");
   if (!result.ok) {
     return fail(result.code, result.message);
   }
 
+  const mock =
+    process.env.SMS_USE_MOCK === "true" ||
+    !process.env.TENCENT_SMS_SECRET_ID?.trim();
+
   return ok({
     ok: true as const,
-    /** 开发提示：真短信接入后移除此字段 */
-    mockHint: "模拟短信已「发送」，验证码为 111111",
+    ...(mock
+      ? {
+          mockHint: `模拟短信已发送，验证码为 ${process.env.SMS_MOCK_CODE?.trim() || "111111"}`,
+        }
+      : {}),
   });
 }

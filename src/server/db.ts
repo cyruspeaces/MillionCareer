@@ -5,7 +5,7 @@ import { PrismaClient } from "@/generated/prisma/client";
  * schema / generate 变更后递增，避免 Next HMR 沿用旧 PrismaClient
  *（旧实例会缺 assessmentRecord 等新模型）
  */
-const PRISMA_CLIENT_REVISION = 7;
+const PRISMA_CLIENT_REVISION = 8;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;

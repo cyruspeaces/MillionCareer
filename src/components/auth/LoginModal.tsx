@@ -20,7 +20,7 @@ export function LoginModal({ open, next, onClose, onSuccess }: Props) {
   const [countdown, setCountdown] = useState(0);
   const [sending, setSending] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [hint, setHint] = useState("开发期模拟短信，验证码固定为 111111");
+  const [hint, setHint] = useState("验证码将发送至你的手机，5 分钟内有效");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function LoginModal({ open, next, onClose, onSuccess }: Props) {
     setCode("");
     setCountdown(0);
     setError("");
-    setHint("开发期模拟短信，验证码固定为 111111");
+    setHint("验证码将发送至你的手机，5 分钟内有效");
   }, [open]);
 
   useEffect(() => {
