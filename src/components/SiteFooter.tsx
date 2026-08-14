@@ -28,7 +28,17 @@ export function SiteFooter() {
         </div>
       </div>
       <div className="border-t border-[var(--color-border)] py-4 text-center text-xs text-[var(--color-text-secondary)]">
-        © {new Date().getFullYear()} 百万职场 · Million Career
+        <p>© {new Date().getFullYear()} 百万职场 · Million Career</p>
+        <p className="mt-1.5">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition hover:text-[var(--color-primary)]"
+          >
+            京ICP备17001001号-12
+          </a>
+        </p>
       </div>
     </footer>
   );
