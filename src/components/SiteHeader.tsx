@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -102,8 +103,37 @@ function UserMenu() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, openLogin, setUser, refreshUser } = useAuth();
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const el = rootRef.current;
+      if (!el) return;
+      if (event.target instanceof Node && !el.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
 
   const onLogout = async () => {
+    setOpen(false);
     await logout();
     setUser(null);
     await refreshUser();
@@ -137,69 +167,71 @@ function UserMenu() {
   const initials = avatarInitials(user.nickname, user.phone);
 
   return (
-    <div className="group relative">
+    <div className="relative" ref={rootRef}>
       <button
         type="button"
-        className="inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm outline-none transition group-hover:opacity-95 sm:size-10"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex size-9 items-center justify-center rounded-full text-sm font-semibold text-white shadow-sm outline-none transition hover:opacity-95 sm:size-10"
         style={{ backgroundColor: AVATAR_COLOR }}
         aria-label={`${name}的账户菜单`}
         aria-haspopup="menu"
+        aria-expanded={open}
       >
         {initials}
       </button>
 
-      <div
-        className="invisible absolute right-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-        role="menu"
-      >
-        <div className="w-56 overflow-hidden rounded-xl border border-[var(--color-border)]/70 bg-white/95 shadow-lg backdrop-blur-md">
-          <div className="flex items-center gap-3 border-b border-[var(--color-border)]/60 px-4 py-3.5">
-            <span
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-              style={{ backgroundColor: AVATAR_COLOR }}
-            >
-              {initials}
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-[var(--color-primary)]">
-                {name}
-              </p>
-              <p className="truncate text-xs text-[var(--color-text-secondary)]">
-                {maskPhone(user.phone) || "AI 任务创作者"}
-              </p>
+      {open ? (
+        <div className="absolute right-0 top-full z-50 pt-2" role="menu">
+          <div className="w-56 overflow-hidden rounded-xl border border-[var(--color-border)]/70 bg-white/95 shadow-lg backdrop-blur-md">
+            <div className="flex items-center gap-3 border-b border-[var(--color-border)]/60 px-4 py-3.5">
+              <span
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                style={{ backgroundColor: AVATAR_COLOR }}
+              >
+                {initials}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-[var(--color-primary)]">
+                  {name}
+                </p>
+                <p className="truncate text-xs text-[var(--color-text-secondary)]">
+                  {maskPhone(user.phone) || "AI 任务创作者"}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-1.5">
+              {menuLinks.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    role="menuitem"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)]"
+                  >
+                    <Icon className="size-4 shrink-0" aria-hidden />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-[var(--color-border)]/60 p-1.5">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => void onLogout()}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-primary)]"
+              >
+                <LogOut className="size-4 shrink-0" aria-hidden />
+                登出
+              </button>
             </div>
           </div>
-
-          <div className="p-1.5">
-            {menuLinks.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  role="menuitem"
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-primary)]"
-                >
-                  <Icon className="size-4 shrink-0" aria-hidden />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="border-t border-[var(--color-border)]/60 p-1.5">
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => void onLogout()}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-[var(--color-text-secondary)] transition hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-primary)]"
-            >
-              <LogOut className="size-4 shrink-0" aria-hidden />
-              登出
-            </button>
-          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

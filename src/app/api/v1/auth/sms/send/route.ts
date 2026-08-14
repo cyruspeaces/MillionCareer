@@ -14,9 +14,7 @@ export async function POST(request: Request) {
     return fail(result.code, result.message);
   }
 
-  const mock =
-    process.env.SMS_USE_MOCK === "true" ||
-    !process.env.TENCENT_SMS_SECRET_ID?.trim();
+  const mock = process.env.SMS_USE_MOCK === "true";
 
   return ok({
     ok: true as const,

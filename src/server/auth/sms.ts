@@ -24,10 +24,19 @@ export function getMockSmsCode(): string {
 }
 
 function useMockSms(): boolean {
-  if (process.env.SMS_USE_MOCK === "true") return true;
-  const id = process.env.TENCENT_SMS_SECRET_ID?.trim();
-  const key = process.env.TENCENT_SMS_SECRET_KEY?.trim();
-  return !id || !key;
+  // 仅显式开启才走 mock；生产漏配密钥应直接失败，避免误发 111111
+  return process.env.SMS_USE_MOCK === "true";
+}
+
+function assertTencentSmsConfigured() {
+  const secretId = process.env.TENCENT_SMS_SECRET_ID?.trim();
+  const secretKey = process.env.TENCENT_SMS_SECRET_KEY?.trim();
+  const sdkAppId = process.env.TENCENT_SMS_SDK_APP_ID?.trim();
+  const signName = process.env.TENCENT_SMS_SIGN_NAME?.trim();
+  const templateId = process.env.TENCENT_SMS_TEMPLATE_ID?.trim();
+  if (!secretId || !secretKey || !sdkAppId || !signName || !templateId) {
+    throw new Error("短信服务未正确配置");
+  }
 }
 
 function codeTtlMinutes(): number {
@@ -49,6 +58,9 @@ function friendlySmsError(detail: string): string {
     return "验证码发送过于频繁，请稍后再试";
   }
   if (lower.includes("insufficient") || lower.includes("balance")) {
+    return "验证码暂时无法发送，请稍后再试";
+  }
+  if (lower.includes("未正确配置") || lower.includes("配置不完整")) {
     return "验证码暂时无法发送，请稍后再试";
   }
   // 详细错误只打日志，不直接展示给用户
@@ -115,6 +127,7 @@ export async function sendSmsCode(phoneRaw: string): Promise<SmsResult> {
 
   if (!useMockSms()) {
     try {
+      assertTencentSmsConfigured();
       await sendViaTencent(phone, code, minutes);
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
