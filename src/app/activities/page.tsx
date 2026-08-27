@@ -8,16 +8,13 @@ export default async function ActivitiesPage() {
   const activities = await listActivities();
 
   return (
-    <StaticPageShell
-      title="AI 活动"
-      description="挑战赛、评测周与共创营。用作品和参与进入优质创作者池。"
-    >
+    <StaticPageShell>
       {activities.length === 0 ? (
         <p className="mt-8 text-sm text-[var(--color-text-secondary)]">
           暂无进行中的活动，稍后再来看看。
         </p>
       ) : (
-        <ul className="mt-8 space-y-4">
+        <ul className="space-y-4">
           {activities.map((act) => (
             <li key={act.id}>
               <Link

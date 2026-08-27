@@ -5,7 +5,7 @@ import { PrismaClient } from "@/generated/prisma/client";
  * schema / generate 变更后递增，避免 Next HMR 沿用旧 PrismaClient
  *（旧实例会缺 assessmentRecord 等新模型）
  */
-const PRISMA_CLIENT_REVISION = 8;
+const PRISMA_CLIENT_REVISION = 9;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -40,16 +40,16 @@ function getPrismaClient() {
 
   // 热更新后若 Client 类未刷新，实例会缺新模型；探测后强制重建
   const client = globalForPrisma.prisma as PrismaClient & {
-    assessmentRecord?: unknown;
+    job?: unknown;
   };
-  if (typeof client.assessmentRecord === "undefined") {
+  if (typeof client.job === "undefined") {
     globalForPrisma.prisma = createPrismaClient();
     const rebuilt = globalForPrisma.prisma as PrismaClient & {
-      assessmentRecord?: unknown;
+      job?: unknown;
     };
-    if (typeof rebuilt.assessmentRecord === "undefined") {
+    if (typeof rebuilt.job === "undefined") {
       throw new Error(
-        "Prisma Client 缺少 AssessmentRecord，请停止并重启 npm run dev（先执行 npx prisma generate）",
+        "Prisma Client 缺少 Job，请停止并重启 npm run dev（先执行 npx prisma generate）",
       );
     }
   }

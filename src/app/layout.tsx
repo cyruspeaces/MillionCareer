@@ -10,7 +10,7 @@ const notoSansSc = Noto_Sans_SC({
 });
 
 export const metadata: Metadata = {
-  title: "百万职场 · Million Career",
+  title: "百万职场 · 接真实 AI 商单，赢创作与机会",
   description: "连接 AI 真实需求与超级创作者 —— 商单与活动平台",
 };
 

@@ -20,9 +20,7 @@ export default async function Home() {
       <SiteHeader />
       <main className="flex-1">
         <div className="pt-6 sm:pt-8">
-          {activities.length > 0 ? (
-            <ActivityCarousel activities={activities} />
-          ) : null}
+          <ActivityCarousel activities={activities} />
         </div>
         <PlatformHighlights />
         <TaskListSection tasks={tasks} />

@@ -2,20 +2,36 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { TaskCard } from "@/components/home/TaskCard";
 import { TaskDetailDrawer } from "@/components/home/TaskDetailDrawer";
 import { StaticPageShell } from "@/components/StaticPageShell";
 import { fetchTasks } from "@/lib/tasks-client";
 import type { TaskView } from "@/types/task";
 
-const filters = ["全部", "对话训练", "数据达标", "内容创作", "评测标注", "AI 漫剧"];
+const categoryFilters = [
+  "全部",
+  "对话训练",
+  "数据达标",
+  "内容创作",
+  "评测标注",
+  "AI 漫剧",
+];
+const workTypeFilters = [
+  "远程兼职",
+  "远程项目制",
+  "驻场兼职",
+  "驻场项目制",
+  "全职",
+];
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<TaskView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<TaskView | null>(null);
-  const [activeFilter, setActiveFilter] = useState("全部");
+  const [activeCategory, setActiveCategory] = useState("全部");
+  const [activeWorkType, setActiveWorkType] = useState("全部");
 
   useEffect(() => {
     let cancelled = false;
@@ -37,30 +53,56 @@ export default function TasksPage() {
   }, []);
 
   const filteredTasks = useMemo(() => {
-    if (activeFilter === "全部") return tasks;
-    return tasks.filter((task) => task.category === activeFilter);
-  }, [activeFilter, tasks]);
+    return tasks.filter((task) => {
+      const matchCategory =
+        activeCategory === "全部" || task.category === activeCategory;
+      const matchWorkType =
+        activeWorkType === "全部" || task.workType === activeWorkType;
+      return matchCategory && matchWorkType;
+    });
+  }, [activeCategory, activeWorkType, tasks]);
 
   return (
-    <StaticPageShell title="AI 任务">
-      <div className="mt-6 flex flex-wrap gap-2 text-xs sm:text-sm">
-        {filters.map((label) => {
-          const active = label === activeFilter;
-          return (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setActiveFilter(label)}
-              className={
-                active
-                  ? "inline-flex h-8 items-center rounded-full bg-[var(--color-primary)] px-3.5 font-medium text-white"
-                  : "inline-flex h-8 items-center rounded-full bg-white/45 px-3.5 font-medium text-[var(--color-primary)] backdrop-blur-sm transition hover:bg-white/70"
-              }
-            >
-              {label}
-            </button>
-          );
-        })}
+    <StaticPageShell>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+        <div className="flex flex-wrap gap-2">
+          {categoryFilters.map((label) => {
+            const active = label === activeCategory;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setActiveCategory(label)}
+                className={
+                  active
+                    ? "inline-flex h-8 items-center rounded-full bg-[var(--color-primary)] px-3.5 font-medium text-white"
+                    : "inline-flex h-8 items-center rounded-full bg-white/45 px-3.5 font-medium text-[var(--color-primary)] backdrop-blur-sm transition hover:bg-white/70"
+                }
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+        <label className="relative inline-flex">
+          <span className="sr-only">工作方式</span>
+          <select
+            value={activeWorkType}
+            onChange={(e) => setActiveWorkType(e.target.value)}
+            className="h-8 appearance-none rounded-full border-0 bg-white/45 py-0 pl-3.5 pr-8 font-medium text-[var(--color-primary)] backdrop-blur-sm outline-none transition hover:bg-white/70"
+          >
+            <option value="全部">工作方式</option>
+            {workTypeFilters.map((label) => (
+              <option key={label} value={label}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className="pointer-events-none absolute right-2.5 top-1/2 size-3.5 -translate-y-1/2 text-[var(--color-primary)]"
+            aria-hidden
+          />
+        </label>
       </div>
 
       {loading ? (

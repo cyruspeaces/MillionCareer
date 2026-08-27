@@ -16,8 +16,8 @@ export function TaskListSection({ tasks: initialTasks }: Props) {
   const [selected, setSelected] = useState<TaskView | null>(null);
 
   return (
-    <section className="px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mx-auto max-w-6xl">
+    <section className="py-12 sm:py-16">
+      <div className="page-wrap">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
             {["全部", "对话训练", "数据达标", "内容创作", "评测标注"].map(

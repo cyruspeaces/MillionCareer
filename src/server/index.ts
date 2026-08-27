@@ -45,6 +45,7 @@ export {
   RegisterError,
 } from "./activity/service";
 export type { RegisterResult } from "./activity/service";
+export { listJobs, getJobById } from "./job/service";
 export { listMySettlements } from "./settlement/service";
 export type {
   MySettlementsResult,

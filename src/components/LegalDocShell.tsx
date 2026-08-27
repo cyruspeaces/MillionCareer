@@ -13,7 +13,7 @@ export function LegalDocShell({ title, updatedAt, children }: Props) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-12">
+      <main className="page-wrap flex-1 py-10 sm:py-12">
         <p className="text-xs text-[var(--color-text-secondary)]">
           <Link href="/" className="hover:text-[var(--color-primary)]">
             首页

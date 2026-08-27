@@ -660,6 +660,120 @@ async function seedActivities(prisma: PrismaClient) {
   console.log(`活动已同步：${activities.length} 条种子，库中共 ${count} 条`);
 }
 
+const PUBLISHER_NOTE =
+  "本岗位为腾讯正式编制，由北斗领航协助对接。请扫码添加企业微信沟通投递，站内暂不收简历。";
+
+const jobs = [
+  {
+    id: "job-tencent-2",
+    title: "混元大模型高级研发项目经理（北京/深圳）",
+    summary: "负责大模型研发项目的目标对齐、计划拟定、过程管理与风险控制。",
+    description:
+      "1.负责大模型研发项目的目标对齐、计划拟定、过程管理、风险控制；与算法、产品、工程、数据等多个团队深度合作，确保目标得到精准理解并高效实现；\n2.建立和优化公共流程、机制、规范，提升内外协同效率，提供稳定高效的管理工具；\n3.负责团队知识管理和沉淀，赋能项目成员。",
+    department: "基础模型部",
+    jobType: "研发项目管理",
+    location: "北京",
+    locationNote: "北京/深圳",
+    headcount: 1,
+    sortOrder: 2,
+  },
+  {
+    id: "job-tencent-11",
+    title: "光子 AI-游戏模型评测专家",
+    summary: "构建覆盖多模态生成与理解的游戏模型评测体系，并推动评测流程落地。",
+    description:
+      "1.构建游戏模型评测体系：通过紧跟先进模型及应用的前沿发展，设计全面、准确的多维度指标，建立覆盖多模态（文本/语音/图像/视频/3D等）生成、多模态理解等全面、多维度的评测体系；\n2.构建游戏模型评测流程：协同多方相关团队梳理并构建游戏模型评测流程，定期监控模型效果，分析问题并提供优化方案，把模型评测流程高效落地；\n3.积极洞察行业动态：持续完善评测体系、快速反馈行业动态及模型能力。",
+    department: "光子技术发展部",
+    jobType: "行业应用",
+    location: "深圳",
+    locationNote: "深圳",
+    headcount: 1,
+    sortOrder: 11,
+  },
+  {
+    id: "job-tencent-24",
+    title: "微信-视觉设计师-AIGC/模型美学方向",
+    summary: "制定图像/视频生成大模型的美学标准，并推动 AIGC 在业务场景落地。",
+    description:
+      "1.负责图像/视频生成大模型的美学标准制定、数据采集、模型调优与效果验收等工作；\n2.跟踪 AIGC 工具与视觉趋势，形成专业洞察与美学规范，推动模型美学能力持续优化；\n3.探索 AIGC 技术在业务场景中的创新应用，包括但不限于视频特效模板、直播礼物、互动内容等方向。",
+    department: "基础产品部",
+    jobType: "视觉设计",
+    location: "广州",
+    locationNote: "广州",
+    headcount: 1,
+    sortOrder: 24,
+  },
+  {
+    id: "job-tencent-26",
+    title: "腾讯混元大模型数据飞轮产品经理",
+    summary: "搭建混元大模型「使用-回流-迭代升级」的数据飞轮闭环。",
+    description:
+      "1.数据飞轮闭环搭建：负责混元大模型数据飞轮体系产品设计与落地，挖掘模型使用短板与业务痛点，搭建「使用-回流-迭代升级」的正向数据闭环；\n2.数据驱动模型能力升级：基于用户 Workflow 及真实场景，联动算法、数据团队分析模型能力缺陷，针对性迭代数据飞轮规则与工具能力；\n3.产品全生命周期落地：独立完成需求调研、产品方案设计与落地推进。",
+    department: "AI Data部",
+    jobType: "产品策划",
+    location: "北京",
+    locationNote: "北京",
+    headcount: 1,
+    sortOrder: 26,
+  },
+  {
+    id: "job-tencent-41",
+    title: "AI视频数据项目经理",
+    summary: "将视频生成模型的数据需求转化为可执行标注规则，并管理并行评测项目。",
+    description:
+      "1.需求承接与规则制定：作为 AI 视频方向数据对接人，深入理解视频生成模型各阶段的数据需求，主导将算法需求转化为可执行的标注规则与评测标准；\n2.项目全流程管理：独立负责 AI 视频方向多个并行标注/评测项目的全生命周期管理；\n3.交付质控体系搭建：主导各类项目交付和团队情况评估。",
+    department: "内容服务部",
+    jobType: "交付项目管理",
+    location: "北京",
+    locationNote: "北京",
+    headcount: 1,
+    sortOrder: 41,
+  },
+  {
+    id: "job-tencent-52",
+    title: "微信输入法-AI产品经理",
+    summary: "围绕 LLM、Agent 与语音交互，探索输入法 AI 产品落地。",
+    description:
+      "1.负责微信输入法 AI 方向的产品策划，围绕大语言模型（LLM）、Agent、多模态交互、语音识别与合成（ASR）等前沿技术，探索 AI 在文字输入、智能表达、语音交互、内容创作等核心场景的创新落地方案；\n2.深度挖掘用户在输入全链路中对 AI 的真实需求和使用场景，设计端到端的产品解决方案并推动落地；\n3.结合业务目标定义模型效果标准和评测体系，协同算法、工程、设计推进落地。",
+    department: "读书产品部",
+    jobType: "产品经理",
+    location: "广州",
+    locationNote: "广州",
+    headcount: 2,
+    sortOrder: 52,
+  },
+];
+
+async function seedJobs(prisma: PrismaClient) {
+  for (const j of jobs) {
+    const data = {
+      campaign: "tencent",
+      title: j.title,
+      summary: j.summary,
+      description: j.description,
+      department: j.department,
+      jobType: j.jobType,
+      location: j.location,
+      locationNote: j.locationNote,
+      headcount: j.headcount,
+      salaryText: "面议",
+      publisherName: "腾讯",
+      publisherNote: PUBLISHER_NOTE,
+      requirements: [] as string[],
+      status: "OPEN" as const,
+      listed: true,
+      sortOrder: j.sortOrder,
+    };
+    await prisma.job.upsert({
+      where: { id: j.id },
+      create: { id: j.id, ...data },
+      update: data,
+    });
+  }
+  const count = await prisma.job.count();
+  console.log(`岗位已同步：${jobs.length} 条种子，库中共 ${count} 条`);
+}
+
 async function main() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DATABASE_URL is not set");
@@ -672,6 +786,7 @@ async function main() {
     await seedSkills(prisma);
     await seedTasks(prisma);
     await seedActivities(prisma);
+    await seedJobs(prisma);
   } finally {
     await prisma.$disconnect();
   }

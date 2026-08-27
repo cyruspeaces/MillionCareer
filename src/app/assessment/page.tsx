@@ -510,7 +510,7 @@ export default function AssessmentPage() {
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+      <main className="page-wrap flex-1 py-10">
         {stage === "intro" ? (
           <div className="mx-auto max-w-2xl">
             <p className="text-xs font-semibold tracking-[0.2em] text-[var(--color-accent)]">

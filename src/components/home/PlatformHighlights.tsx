@@ -35,8 +35,8 @@ const highlights: {
 
 export function PlatformHighlights() {
   return (
-    <section className="px-4 pt-6 sm:px-6 sm:pt-8">
-      <div className="mx-auto grid max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <section className="pt-6 sm:pt-8">
+      <div className="page-wrap grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {highlights.map((item) => {
           const Icon = item.icon;
           return (

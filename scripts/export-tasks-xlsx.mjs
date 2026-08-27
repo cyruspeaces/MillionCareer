@@ -26,7 +26,7 @@ const categories = [
   "内容创作",
   "广告制作",
 ];
-const workTypes = ["远程兼职", "远程项目制", "驻场兼职", "驻场项目制"];
+const workTypes = ["远程兼职", "远程项目制", "驻场兼职", "驻场项目制", "全职"];
 const rewardUnits = ["百条", "十组", "条", "包", "单", "小时", "天", "次"];
 const statuses = ["草稿", "招募中"];
 const locations = ["不限地区", "仅限中国大陆", "仅限远程海外"];

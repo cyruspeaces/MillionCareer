@@ -136,7 +136,7 @@ export default function ActivityDetailPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <main className="page-wrap flex-1 py-8 sm:py-10">
         <Link
           href="/activities"
           className="inline-flex items-center gap-1 text-sm text-[var(--color-primary)] hover:underline"
@@ -229,7 +229,7 @@ export default function ActivityDetailPage() {
             </div>
 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-border)]/70 bg-[var(--color-bg)]/95 px-4 py-3 backdrop-blur-md">
-              <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="page-wrap flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-[var(--color-text)]">
                     {activity.title}

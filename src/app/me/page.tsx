@@ -398,7 +398,7 @@ function MePageContent() {
     return (
       <div className="flex min-h-full flex-1 flex-col">
         <SiteHeader />
-        <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-16 text-center text-sm text-[var(--color-text-secondary)]">
+        <div className="page-wrap flex-1 py-16 text-center text-sm text-[var(--color-text-secondary)]">
           加载中…
         </div>
         <SiteFooter />
@@ -435,7 +435,7 @@ function MePageContent() {
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
 
-      <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+      <div className="page-wrap flex-1 py-8 sm:py-10">
         {/* 移动端横向导航 */}
         <div className="mb-5 md:hidden">
           <div className="mb-3 flex items-center gap-2">
@@ -951,7 +951,7 @@ export default function MePage() {
       fallback={
         <div className="flex min-h-full flex-1 flex-col">
           <SiteHeader />
-          <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6" />
+          <div className="page-wrap flex-1 py-8" />
           <SiteFooter />
         </div>
       }

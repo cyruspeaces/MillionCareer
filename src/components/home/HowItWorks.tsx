@@ -18,8 +18,8 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="border-t border-[var(--color-border)]/60 bg-transparent px-4 py-12 sm:px-6 sm:py-14">
-      <div className="mx-auto max-w-6xl">
+    <section className="border-t border-[var(--color-border)]/60 bg-transparent py-12 sm:py-14">
+      <div className="page-wrap">
         <h2 className="text-lg font-semibold text-[var(--color-primary)] sm:text-xl">
           如何协作
         </h2>

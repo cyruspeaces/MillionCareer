@@ -40,6 +40,12 @@ enum ActivityStatus {
   CLOSED
 }
 
+enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
 enum SubmissionTargetType {
   TASK
   ACTIVITY
@@ -380,6 +386,38 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, read])
+}
+
+/// 全职岗位（与 Task 商单分离；一期先浏览，投递走私域）
+model Job {
+  id             String    @id @default(cuid())
+  /// 专题/品牌：tencent
+  campaign       String
+  title          String
+  summary        String?
+  description    String
+  department     String?
+  /// 职类：应用研究 / 产品经理 / 游戏策划 …
+  jobType        String?
+  location       String?
+  /// 对外地点补充：北京/深圳
+  locationNote   String?
+  headcount      Int?
+  salaryText     String?
+  publisherName  String
+  publisherNote  String?
+  requirements   String[]  @default([])
+  status         JobStatus @default(DRAFT)
+  /// 站点上架；与 status 独立（在招也可以先不上）
+  listed         Boolean   @default(false)
+  sortOrder      Int       @default(0)
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status, listed, campaign])
+  @@index([jobType])
+  @@index([location])
 }
 
 model Settlement {

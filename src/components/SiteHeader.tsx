@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Briefcase,
   CalendarDays,
   CircleDollarSign,
   ClipboardList,
@@ -27,6 +28,7 @@ type NavItem = {
   href: string;
   label: string;
   icon?: LucideIcon;
+  badge?: string;
   match: (pathname: string) => boolean;
 };
 
@@ -41,6 +43,13 @@ const navItems: NavItem[] = [
     label: "任务",
     icon: ListTodo,
     match: (pathname) => pathname.startsWith("/tasks"),
+  },
+  {
+    href: "/jobs",
+    label: "岗位",
+    icon: Briefcase,
+    badge: "HOT · 腾讯专场",
+    match: (pathname) => pathname.startsWith("/jobs"),
   },
   {
     href: "/activities",
@@ -66,7 +75,7 @@ function NavLink({
     <Link
       href={item.href}
       className={[
-        "inline-flex items-center rounded-full font-medium transition",
+        "relative inline-flex items-center rounded-full font-medium transition",
         compact ? "gap-1 px-2.5 py-1.5 text-xs" : "gap-1.5 px-3.5 py-1.5 text-sm",
         active
           ? "bg-white/55 text-[var(--color-primary)] shadow-[inset_0_0_0_1px_rgba(47,49,139,0.1)] backdrop-blur-sm"
@@ -81,6 +90,18 @@ function NavLink({
         />
       ) : null}
       <span>{item.label}</span>
+      {item.badge ? (
+        <span
+          className={[
+            "nav-hot-badge absolute z-10 whitespace-nowrap rounded-full font-semibold tracking-wide text-white",
+            compact
+              ? "-right-4 -top-2 translate-x-[30px] px-1.5 py-px text-[8px]"
+              : "-right-7 -top-2.5 translate-x-[30px] px-1.5 py-px text-[9px]",
+          ].join(" ")}
+        >
+          {compact ? "HOT" : item.badge}
+        </span>
+      ) : null}
     </Link>
   );
 }
@@ -241,7 +262,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)]/50 bg-transparent backdrop-blur-[10px]">
-      <div className="mx-auto grid h-14 w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 sm:h-16 sm:px-6">
+      <div className="page-wrap grid h-14 grid-cols-[1fr_auto_1fr] items-center gap-3 sm:h-16">
         <div className="flex min-w-0 items-center gap-3 justify-self-start">
           <Link href="/" className="flex shrink-0 items-center gap-2">
             <Image

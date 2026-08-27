@@ -3,7 +3,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 
 type Props = {
-  title: string;
+  title?: string;
   description?: string;
   children?: ReactNode;
 };
@@ -12,10 +12,12 @@ export function StaticPageShell({ title, description, children }: Props) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 sm:px-6">
-        <h1 className="text-2xl font-bold text-[var(--color-primary)] sm:text-3xl">
-          {title}
-        </h1>
+      <main className="page-wrap flex-1 py-12">
+        {title ? (
+          <h1 className="text-2xl font-bold text-[var(--color-primary)] sm:text-3xl">
+            {title}
+          </h1>
+        ) : null}
         {description ? (
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-text-secondary)] sm:text-base">
             {description}
