@@ -133,7 +133,8 @@ export function SkillMatchPanel({ requiredSkills, ownedSkills }: Props) {
   const owned = new Set(ownedSkills);
   const matched = requiredSkills.filter((skill) => owned.has(skill));
   const missing = requiredSkills.filter((skill) => !owned.has(skill));
-  const ready = missing.length === 0 && requiredSkills.length > 0;
+  const noRequirement = requiredSkills.length === 0;
+  const ready = missing.length === 0;
   const [guideSkill, setGuideSkill] = useState<string | null>(null);
 
   useEffect(() => {
@@ -173,11 +174,14 @@ export function SkillMatchPanel({ requiredSkills, ownedSkills }: Props) {
       </div>
 
       <p className="mt-2 text-xs leading-5 text-[var(--color-text-secondary)]">
-        {ready
-          ? "所需技能均已点亮，可以直接报名领取。"
-          : "点击橙色「待学习」查看如何点亮，补齐后再报名。"}
+        {noRequirement
+          ? "本任务不设技能门槛，注册用户可以直接报名。"
+          : ready
+            ? "所需技能均已点亮，可以直接报名领取。"
+            : "点击橙色「待学习」查看如何点亮，补齐后再报名。"}
       </p>
 
+      {noRequirement ? null : (
       <div className="mt-4 flex flex-wrap gap-2.5">
         {requiredSkills.map((skill) => (
           <SkillTag
@@ -188,6 +192,7 @@ export function SkillMatchPanel({ requiredSkills, ownedSkills }: Props) {
           />
         ))}
       </div>
+      )}
 
       {!ready && missing.length > 0 ? (
         <button
@@ -200,9 +205,11 @@ export function SkillMatchPanel({ requiredSkills, ownedSkills }: Props) {
         </button>
       ) : null}
 
+      {noRequirement ? null : (
       <p className="mt-3 text-[11px] text-[var(--color-text-secondary)]">
         已点亮 {matched.length}/{requiredSkills.length} 个技能
       </p>
+      )}
 
       <SkillGuideSheet
         open={Boolean(guideSkill)}
@@ -218,11 +225,9 @@ export function canEnrollWithSkills(
   requiredSkills: string[],
   ownedSkills: string[],
 ) {
+  if (requiredSkills.length === 0) return true;
   const owned = new Set(ownedSkills);
-  return (
-    requiredSkills.length > 0 &&
-    requiredSkills.every((skill) => owned.has(skill))
-  );
+  return requiredSkills.every((skill) => owned.has(skill));
 }
 
 export function EnrollButton({

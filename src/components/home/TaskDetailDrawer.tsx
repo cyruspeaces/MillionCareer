@@ -325,10 +325,16 @@ export function TaskDetailDrawer({ task, onClose, onApplied }: Props) {
                   <p className="mb-2 text-xs font-semibold tracking-wide text-[var(--color-text-secondary)]">
                     所需技能
                   </p>
-                  <SkillTagRow
-                    skills={displayTask.skills}
-                    ownedSkills={ownedSkills}
-                  />
+                  {displayTask.skills.length === 0 ? (
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                      不限技能，注册即可报名
+                    </p>
+                  ) : (
+                    <SkillTagRow
+                      skills={displayTask.skills}
+                      ownedSkills={ownedSkills}
+                    />
+                  )}
                 </div>
 
                 <section className="mt-8">
@@ -395,10 +401,12 @@ export function TaskDetailDrawer({ task, onClose, onApplied }: Props) {
                   ) : null}
                 </div>
 
-                <SkillMatchPanel
-                  requiredSkills={displayTask.skills}
-                  ownedSkills={ownedSkills}
-                />
+                {displayTask.skills.length > 0 ? (
+                  <SkillMatchPanel
+                    requiredSkills={displayTask.skills}
+                    ownedSkills={ownedSkills}
+                  />
+                ) : null}
 
                 <section className="rounded-xl border border-[var(--color-border)]/70 bg-white/45 px-4 py-4">
                   <h3 className="text-sm font-semibold text-[var(--color-text)]">
