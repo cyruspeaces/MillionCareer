@@ -52,6 +52,7 @@ export type TaskRowForView = {
   enrollSteps: string[];
   references: unknown;
   status: string;
+  displayJoinedCount?: number;
   taskSkills: {
     skill: { name: string; sortOrder?: number };
     required: boolean;
@@ -69,11 +70,20 @@ function formatDeadline(deadline: Date | null): string {
   return `${m}-${d} 截止`;
 }
 
-function formatQuota(quota: number | null, joined: number): string {
+function formatQuota(quota: number | null, realJoined: number): string {
   if (quota == null) return "名额不限";
-  const remain = Math.max(quota - joined, 0);
+  const remain = Math.max(quota - realJoined, 0);
   return `余 ${remain} 名`;
 }
+
+const PLACEHOLDER_PARTICIPANTS: TaskParticipant[] = [
+  { initials: "林", color: AVATAR_COLORS[0] },
+  { initials: "周", color: AVATAR_COLORS[1] },
+  { initials: "陈", color: AVATAR_COLORS[2] },
+  { initials: "黄", color: AVATAR_COLORS[3] },
+  { initials: "刘", color: AVATAR_COLORS[4] },
+  { initials: "吴", color: AVATAR_COLORS[5] },
+];
 
 function parseReferences(raw: unknown): TaskReference[] {
   if (!Array.isArray(raw)) return [];
@@ -90,14 +100,17 @@ function parseReferences(raw: unknown): TaskReference[] {
 
 function toParticipants(
   applications: TaskRowForView["applications"],
+  virtualJoined: number,
 ): TaskParticipant[] {
-  return applications.slice(0, 8).map((app, i) => {
+  const real = applications.slice(0, 8).map((app, i) => {
     const name = app.user.nickname?.trim() || "创";
     return {
       initials: name.slice(0, 1),
       color: AVATAR_COLORS[i % AVATAR_COLORS.length],
     };
   });
+  if (real.length > 0 || virtualJoined <= 0) return real;
+  return PLACEHOLDER_PARTICIPANTS;
 }
 
 /** 报名步骤：label 来自 enrollSteps；done 暂统一 false（报名状态机后按用户状态派生） */
@@ -119,7 +132,9 @@ function toSteps(enrollSteps: string[]): TaskStep[] {
 }
 
 export function toTaskView(row: TaskRowForView): TaskView {
-  const joinedCount = row._count.applications;
+  const realJoined = row._count.applications;
+  const virtualJoined = row.displayJoinedCount ?? 0;
+  const joinedCount = realJoined + virtualJoined;
   return {
     id: row.id,
     category: row.category ?? "未分类",
@@ -128,9 +143,9 @@ export function toTaskView(row: TaskRowForView): TaskView {
     reward: row.rewardText ?? "报酬面议",
     status: STATUS_LABEL[row.status] ?? row.status,
     deadline: formatDeadline(row.deadline),
-    quota: formatQuota(row.quota, joinedCount),
+    quota: formatQuota(row.quota, realJoined),
     joinedCount,
-    participants: toParticipants(row.applications),
+    participants: toParticipants(row.applications, virtualJoined),
     workType: row.workType ?? "远程",
     location: row.location ?? "不限地区",
     about: row.description,

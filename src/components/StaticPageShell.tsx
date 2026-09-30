@@ -6,13 +6,19 @@ type Props = {
   title?: string;
   description?: string;
   children?: ReactNode;
+  mainClassName?: string;
 };
 
-export function StaticPageShell({ title, description, children }: Props) {
+export function StaticPageShell({
+  title,
+  description,
+  children,
+  mainClassName = "page-wrap flex-1 py-12",
+}: Props) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <SiteHeader />
-      <main className="page-wrap flex-1 py-12">
+      <main className={mainClassName}>
         {title ? (
           <h1 className="text-2xl font-bold text-[var(--color-primary)] sm:text-3xl">
             {title}

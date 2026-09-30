@@ -75,7 +75,7 @@ function JobsPageContent() {
   }, [jobs, activeLocation, activeJobType]);
 
   return (
-    <StaticPageShell>
+    <StaticPageShell mainClassName="page-wrap flex-1 pb-12 pt-6 sm:pt-8">
       <div className="overflow-hidden rounded-xl">
         <TencentJobsBanner />
       </div>

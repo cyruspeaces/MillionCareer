@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { BankCardModal } from "@/components/auth/BankCardModal";
 import { NicknameModal } from "@/components/auth/NicknameModal";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -28,6 +29,11 @@ import {
   logout,
   maskPhone,
 } from "@/lib/auth-client";
+import {
+  bankCardTagLabel,
+  fetchMyBankCard,
+  type BankCardView,
+} from "@/lib/bank-card-client";
 import {
   assessmentArchetypes,
   type AssessmentResult,
@@ -267,6 +273,8 @@ function MePageContent() {
   });
   const [guideNode, setGuideNode] = useState<SkillTreeNode | null>(null);
   const [nicknameOpen, setNicknameOpen] = useState(false);
+  const [bankCardOpen, setBankCardOpen] = useState(false);
+  const [bankCard, setBankCard] = useState<BankCardView | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -287,6 +295,7 @@ function MePageContent() {
       setAssessment(null);
       setUserSkills([]);
       setMyApplications([]);
+      setBankCard(null);
       setSettlements({
         summary: {
           earnedTotal: 0,
@@ -304,19 +313,22 @@ function MePageContent() {
       fetchMySkills(),
       fetchMyApplications(),
       fetchMySettlements(),
+      fetchMyBankCard(),
     ])
-      .then(([latest, skills, apps, settle]) => {
+      .then(([latest, skills, apps, settle, card]) => {
         if (cancelled) return;
         setAssessment(latest);
         setUserSkills(skills);
         setMyApplications(apps);
         setSettlements(settle);
+        setBankCard(card);
       })
       .catch(() => {
         if (!cancelled) {
           setAssessment(null);
           setUserSkills([]);
           setMyApplications([]);
+          setBankCard(null);
           setSettlements({
             summary: {
               earnedTotal: 0,
@@ -541,7 +553,6 @@ function MePageContent() {
           <main className="min-w-0">
             {section === "overview" ? (
               <div className="space-y-5">
-                <AssessmentEntryCard result={assessment} />
                 <section className="rounded-2xl border border-[var(--color-border)]/70 bg-white/50 p-5 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <span
@@ -567,6 +578,17 @@ function MePageContent() {
                         <span className="rounded-full bg-[var(--color-primary-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)]">
                           {DEFAULT_TITLE}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => setBankCardOpen(true)}
+                          className={
+                            bankCard
+                              ? "rounded-full bg-[var(--color-primary-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-primary)] transition hover:opacity-80"
+                              : "rounded-full border border-[var(--color-accent)]/40 bg-[var(--color-accent-soft)] px-2.5 py-0.5 text-xs font-medium text-[var(--color-accent)] transition hover:opacity-80"
+                          }
+                        >
+                          {bankCard ? bankCardTagLabel(bankCard) : "绑定银行卡"}
+                        </button>
                       </div>
                       <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
                         {maskPhone(user.phone)}
@@ -618,6 +640,8 @@ function MePageContent() {
                     ))}
                   </dl>
                 </section>
+
+                <AssessmentEntryCard result={assessment} />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <button
@@ -939,6 +963,13 @@ function MePageContent() {
           setUser(next);
           void refreshUser();
         }}
+      />
+      <BankCardModal
+        open={bankCardOpen}
+        phone={user.phone}
+        binding={bankCard}
+        onClose={() => setBankCardOpen(false)}
+        onSaved={setBankCard}
       />
       <SiteFooter />
     </div>
